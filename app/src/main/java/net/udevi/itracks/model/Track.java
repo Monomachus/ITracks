@@ -1,5 +1,7 @@
 package net.udevi.itracks.model;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by Timur on 1/26/2015.
  */
@@ -48,5 +50,14 @@ public class Track {
 
     public void setDurationMillis(Long durationMillis) {
         this.durationMillis = durationMillis;
+    }
+
+    public String getFormattedDuration() {
+        return String.format("%02d:%02d:%02d",
+                TimeUnit.MILLISECONDS.toHours(durationMillis),
+                TimeUnit.MILLISECONDS.toMinutes(durationMillis) -
+                        TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(durationMillis)),
+                TimeUnit.MILLISECONDS.toSeconds(durationMillis) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(durationMillis)));
     }
 }

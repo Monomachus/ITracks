@@ -1,9 +1,7 @@
 package net.udevi.itracks;
 
 import java.util.List;
-import java.util.Locale;
 
-import android.app.ActivityManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -12,22 +10,15 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import net.udevi.itracks.helpers.HttpManager;
 import net.udevi.itracks.helpers.TrackJsonParser;
 import net.udevi.itracks.model.Track;
 
@@ -58,6 +49,17 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setupTabs();
+
+        Intent intent = getIntent();
+        // Special processing of the incoming intent only occurs if the if the action specified
+        // by the intent is ACTION_SEARCH.
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            handleIntent(intent);
+        }
+    }
+
+    private void setupTabs() {
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -91,18 +93,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                             .setText(getString(mSectionsPagerAdapter.getPageTitleResourceName(i)).toUpperCase())
                             .setTabListener(this));
         }
-
-        Intent intent = getIntent();
-        // Special processing of the incoming intent only occurs if the if the action specified
-        // by the intent is ACTION_SEARCH.
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            handleIntent(intent);
-        }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        handleIntent(intent);
     }
 
     /**

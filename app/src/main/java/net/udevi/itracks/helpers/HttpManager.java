@@ -1,4 +1,4 @@
-package net.udevi.itracks;
+package net.udevi.itracks.helpers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,9 +7,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-/**
- * Created by Timur on 1/26/2015.
- */
 public class HttpManager {
 
     public static final String ITUNES_SEARCH_URL = "https://itunes.apple.com/search?entity=song&term=";
