@@ -6,5 +6,6 @@
     <string name="title_tabLocal">Local</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="search_title">Search</string>
 
 </resources>
