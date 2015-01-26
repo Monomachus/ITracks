@@ -1,10 +1,15 @@
 package net.udevi.itracks;
 
+import java.util.List;
 import java.util.Locale;
 
+import android.app.ActivityManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -21,6 +26,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import net.udevi.itracks.helpers.TrackJsonParser;
+import net.udevi.itracks.model.Track;
 
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
@@ -41,6 +50,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
+
+    public List<Track> mTracks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +80,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             }
         });
 
-        Locale l = Locale.getDefault();
-
         // For each of the sections in the app, add a tab to the action bar.
         for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
             // Create a tab with text corresponding to the page title defined by
@@ -79,7 +88,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             // this tab is selected.
             actionBar.addTab(
                     actionBar.newTab()
-                            .setText(getString(mSectionsPagerAdapter.getPageTitleResourceName(i)).toUpperCase(l))
+                            .setText(getString(mSectionsPagerAdapter.getPageTitleResourceName(i)).toUpperCase())
                             .setTabListener(this));
         }
 
@@ -106,10 +115,20 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // to an Activity.
         String query = intent.getStringExtra(SearchManager.QUERY);
 
+
+        if (isOnline()){
+            requestWsData(query);
+        }
+        else {
+            Toast.makeText(this, getString(R.string.network_not_available), Toast.LENGTH_LONG).show();
+        }
+
         // We need to create a bundle containing the query string to send along to the
         // LoaderManager, which will be handling querying the database and returning results.
-        Bundle bundle = new Bundle();
-        bundle.putString(QUERY_KEY, query);
+//        Bundle bundle = new Bundle();
+//        bundle.putString(QUERY_KEY, query);
+
+
 
 //            ContactablesLoaderCallbacks loaderCallbacks = new ContactablesLoaderCallbacks(this);
 //
@@ -117,6 +136,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 //            getLoaderManager().restartLoader(CONTACT_QUERY_LOADER, bundle, loaderCallbacks);
     }
 
+    private void requestWsData(String query) {
+        WsTunesTask wsTask = new WsTunesTask();
+        wsTask.execute(query);
+    }
 
 
     @Override
@@ -152,4 +175,32 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     // </editor-fold>
 
+    protected boolean isOnline(){
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public class WsTunesTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            String searchedTerm = params[0];
+            String content = HttpManager.getData(searchedTerm);
+
+            return content;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            mTracks = TrackJsonParser.parseFeed(result);
+
+        }
+    }
 }
